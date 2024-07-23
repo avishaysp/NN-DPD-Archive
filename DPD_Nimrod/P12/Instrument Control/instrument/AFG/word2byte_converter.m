@@ -1,0 +1,23 @@
+function[DEC_bytes]=word2byte_converter(WRD);
+n_wrd=16;
+chr_zr='0';
+% V(1)=2*8192-1;
+% V(2)=0;
+% V(3)=V(1)-64;
+% V(4)=V(2)+100;
+% V(5)=V(4)+1000;
+% A=V;
+A=WRD;
+BN=dec2bin(A);
+SZ=size(BN);
+n_bts=max(SZ(2));
+nzr=n_wrd-n_bts;
+if(nzr > 0)ZR_str=repmat(chr_zr,SZ(1),nzr);end
+BNZ=[ZR_str,BN];
+Byte_ms=BNZ(:,1:8);
+Byte_ls=BNZ(:,9:16);
+DEC_ms=bin2dec(Byte_ms)';
+DEC_ls=bin2dec(Byte_ls)';
+DEC=[DEC_ms;DEC_ls];
+DEC_bytes=DEC(:);
+return

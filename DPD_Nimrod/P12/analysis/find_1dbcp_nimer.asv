@@ -1,0 +1,59 @@
+function [pin,pout, Idc] = find_1dbcp_nimer(scope,ESG,DMM,freq,min_pin,max_pin,pin_step)
+pin=min_pin:pin_step:max_pin;
+
+fprintf(ESG, 'SOURce:FREQuency %d',freq);
+fprintf(ESG, 'POWer %d',pin(1));
+fprintf(scope, ':AUToscale:VERTical CHAN1');
+
+commandCompleted=0;
+while commandCompleted==0
+    commandCompleted = query(scope,'*OPC?');
+end
+
+% fprintf(scope, ':AUToscale');
+% commandCompleted=0;
+% while commandCompleted==0
+%     commandCompleted = query(scope,'*OPC?');
+% end
+
+pause(2)
+fprintf(scope, ':AUToscale:VERTical CHAN1');
+commandCompleted = query(scope,'*OPC?');
+while commandCompleted==0
+    commandCompleted = query(scope,'*OPC?');
+    pause(2)
+end
+read_scope_VRMS_new(scope);
+VRMS=[];Idc=[];
+for iii=1:length(pin)
+    fprintf(ESG, 'POWer %d',pin(iii));
+    
+    fprintf(scope, ':AUToscale:VERTical CHAN1');  
+    commandCompleted = query(scope,'*OPC?');
+    while commandCompleted==0
+        commandCompleted = query(scope,'*OPC?');
+        pause(2)
+    end
+    pause(5)
+    vrms_=read_scope_VRMS_new(scope);
+    VRMS=[VRMS; vrms_];
+    Idc =[Idc, read_I_dmm(DMM)];
+    disp([pin(iii) vrms_ Idc(iii)]);
+end
+pout=10*log10((VRMS.^2)/(50*(10^(-3))));
+
+% GAIN = find_gain( scope,ESG,freq)
+% pout_theory=pin+GAIN
+% figure(1);
+% plot(pin,pout,'black');
+% hold all
+% plot(pin,pout_theory,'b--'); %theoretical gain plot
+%
+% save('amp_test_PA1_3.mat','pin','pout')
+
+%fprintf(scope, ':TIM:RANG 100e-9')
+
+
+
+
+
